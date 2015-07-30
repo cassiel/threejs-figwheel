@@ -1,5 +1,5 @@
 (ns ^:figwheel-always threejs-figwheel.core
-    (:require))
+    (:require [figwheel.client :as fw]))
 
 (enable-console-print!)
 
@@ -74,14 +74,13 @@
     (.removeChild (.-body js/document) (.-domElement renderer)))
   (swap! APP-STATE dissoc :stopper :renderer))
 
-;; Figwheel callback.
-(defn on-js-reload []
-  (teardown-app)
-  (teardown-stats)
+(fw/start {
+  :on-jsload (fn []
+               (teardown-app)
+               (teardown-stats)
 
-  (startup-app)
-  (startup-stats))
+               (startup-app)
+               (startup-stats))})
 
-;; Something for page load (although that means two calls on code reload).
 (startup-app)
 (startup-stats)
