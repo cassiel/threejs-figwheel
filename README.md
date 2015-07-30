@@ -1,12 +1,14 @@
-# threejs-figwheel
+`-*- mode: markdown; mode: visual-line; mode: adaptive-wrap-prefix; -*-`
 
-FIXME: Write a one-line description of your library/project.
+# `threejs-figwheel`
 
-## Overview
+An example project which brings up a minimal "live coding" environment for Clojure-based WebGL in the browser, courtesy of ClojureScript, three.js and Figwheel.
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
+This is basically the Figwheel template project in Leiningen, with the core ClojureScript file set up to do some three.js, and a stripped-down `index.html` to host the results. The HTML also wheels in three.js from a CDN (so alter to taste).
 
-## Setup
+Most of the effort in this project has gone into making the application state as nearly idempotent as possible, so that repeated page or code reloads don't result in multiple canvas instances, background rendering callbacks, and so on. That aside, it's partially inspired by [this by Chris McCormick](https://github.com/chr15m/clojurescript-threejs-playground), [Henry Garner's Multisnake](https://github.com/henrygarner/multisnake), and [Chestnut](https://github.com/plexus/chestnut).
+
+## Setup (from Figwheel docs)
 
 To get an interactive development environment run:
 
@@ -34,6 +36,6 @@ get live reloading, nor a REPL.
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2015 Nick Rothwell, nick@cassiel.com.
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.

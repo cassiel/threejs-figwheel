@@ -3,49 +3,85 @@
 
 (enable-console-print!)
 
-(println "Edits to this text should show up in your developer console.")
+;; There's a little debugging counter in here. This state variable
+;; tracks a couple of components: the three.js renderer and the stats object.
+(defonce APP-STATE (atom {:c 0}))
 
-;; define your app data so that it doesn't get over-written on reload
+;; The startup and teardown routines need to basically be idempotent; in
+;; particular, when a page loads we might see two startup calls.
 
-(defonce app-state (atom {:text "Hello world!"}))
+(defn startup-stats
+  "Install the stats into the page, and into the app state."
+  []
+  (when-not (:stats @APP-STATE)
+    (let [stats (js/Stats.)]
+      (set! (.. stats -domElement -style -position) "absolute")
+      (set! (.. stats -domElement -style -left) "0px")
+      (set! (.. stats -domElement -style -top) "0px")
+      (.appendChild (.-body js/document) (.-domElement stats))
+      (swap! APP-STATE assoc :stats stats))))
 
-(def scene (js/THREE.Scene.))
+(defn teardown-stats
+  "Remove the stats from the page and the app state."
+  []
+  (when-let [stats (:stats @APP-STATE)]
+    (.removeChild (.-body js/document) (.-domElement stats))
+    (swap! APP-STATE dissoc :stats)))
 
-(def camera (js/THREE.PerspectiveCamera. 75
-                                         (/ (.-innerWidth js/window) (.-innerHeight js/window))
-                                         0.1
-                                         1000))
-(def renderer (js/THREE.WebGLRenderer.))
-(def geometry (js/THREE.BoxGeometry. 1 1 1))
-(def material (js/THREE.MeshBasicMaterial. (clj->js {:color 0x00FF00
-                                                     :wireframe false})))
-(def cube (js/THREE.Mesh. geometry material))
-(def stats (js/Stats.))
+(defn startup-app
+  "Swap into the app state the renderer, and a function to stop the current animation loop."
+  []
+  (when-not (:renderer @APP-STATE)
+    (let [scene (js/THREE.Scene.)
+          camera (js/THREE.PerspectiveCamera. 75
+                                              (/ (.-innerWidth js/window) (.-innerHeight js/window))
+                                              0.1
+                                              1000)
+          renderer (js/THREE.WebGLRenderer.)
+          geometry (js/THREE.BoxGeometry. 1 1 1)
+          material (js/THREE.MeshBasicMaterial. (clj->js {:color 0x00FF00
+                                                          :wireframe false}))
+          cube (js/THREE.Mesh. geometry material)
+          ;; An "alive" flag to let us kill the animation refresh when we tear down:
+          RUNNING (atom true)]
+      (set! (.-xxid renderer)
+            (:c (swap! APP-STATE update :c inc)))
+      (.setSize renderer (.-innerWidth js/window) (.-innerHeight js/window))
+      (.log js/console "Adding: " (.-xxid renderer))
+      (.appendChild (.-body js/document) (.-domElement renderer))
+      (.add scene cube)
+      (set! (.. camera -position -z) 3)
 
-(defn render []
-  (.render renderer scene camera))
+      (letfn [(animate []
+                (when @RUNNING (js/requestAnimationFrame animate))
+                (set! (.. cube -rotation -x)
+                      (+ 0.01 (.. cube -rotation -x)))
+                (set! (.. cube -rotation -y)
+                      (+ 0.01 (.. cube -rotation -y)))
+                (.render renderer scene camera)
+                (when-let [stats (:stats @APP-STATE)] (.update stats)))]
+        (animate)
+        (swap! APP-STATE #(assoc %
+                                 :renderer renderer
+                                 :stopper (fn [] (reset! RUNNING false))))))))
 
-(defn animate []
-  (js/requestAnimationFrame animate)
-  (render)
-  (.update stats))
+(defn teardown-app
+  "Stop animation cycle, tear out renderer."
+  []
+  (when-let [stopper (:stopper @APP-STATE)] (stopper))
+  (when-let [renderer (:renderer @APP-STATE)]
+    (.log js/console "Removing: " (.-xxid renderer))
+    (.removeChild (.-body js/document) (.-domElement renderer)))
+  (swap! APP-STATE dissoc :stopper :renderer))
 
-(defn startup []
-  (set! (.. stats -domElement -style -position) "absolute")
-  (set! (.. stats -domElement -style -left) "0px")
-  (set! (.. stats -domElement -style -top) "0px")
-  (.appendChild (.-body js/document) (.-domElement stats))
-
-  (.setSize renderer (.-innerWidth js/window) (.-innerHeight js/window))
-  (.appendChild (.-body js/document) (.-domElement renderer))
-  (.add scene cube)
-  (set! (.. camera -position -z) 5)
-  (animate))
-
+;; Figwheel callback.
 (defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+  (teardown-app)
+  (teardown-stats)
 
-(startup)
+  (startup-app)
+  (startup-stats))
+
+;; Something for page load (although that means two calls on code reload).
+(startup-app)
+(startup-stats)
