@@ -1,6 +1,7 @@
 (ns ^:figwheel-always threejs-figwheel.core
     (:require [figwheel.client :as fw]
-              three))
+              three
+              stats))
 
 (enable-console-print!)
 

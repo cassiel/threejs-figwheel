@@ -19,22 +19,24 @@
     :builds [{:id "dev"
               :source-paths ["src"]
 
-              :figwheel { :on-jsload "threejs-figwheel.core/on-js-reload" }
-
               :compiler {:main threejs-figwheel.core
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/threejs_figwheel.js"
                          :output-dir "resources/public/js/compiled/out"
-                         :foreign-libs [{:file "js/three.min.js"
-                                         :provides ["three"]}]
+                         :foreign-libs [{:file "resources/public/js/three.min.js"
+                                         :provides ["three"]}
+                                        {:file "resources/public/js/stats.min.js"
+                                         :provides ["stats"]}]
                          :source-map-timestamp true }}
              {:id "min"
               :source-paths ["src"]
               :compiler {:output-to "resources/public/js/compiled/threejs_figwheel.js"
                          :main threejs-figwheel.core
                          :optimizations :advanced
-                         :foreign-libs [{:file "js/three.min.js"
-                                         :provides ["three"]}]
+                         :foreign-libs [{:file "resources/public/js/three.min.js"
+                                         :provides ["three"]}
+                                        {:file "resources/public/js/stats.min.js"
+                                         :provides ["stats"]}]
                          :pretty-print false}}]}
 
   :figwheel {
