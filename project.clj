@@ -25,18 +25,22 @@
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/threejs_figwheel.js"
                          :output-dir "resources/public/js/compiled/out"
+                         :foreign-libs [{:file "js/three.min.js"
+                                         :provides ["three"]}]
                          :source-map-timestamp true }}
              {:id "min"
               :source-paths ["src"]
               :compiler {:output-to "resources/public/js/compiled/threejs_figwheel.js"
                          :main threejs-figwheel.core
                          :optimizations :advanced
+                         :foreign-libs [{:file "js/three.min.js"
+                                         :provides ["three"]}]
                          :pretty-print false}}]}
 
   :figwheel {
-             ;; :http-server-root "public" ;; default and assumes "resources" 
+             ;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
-             ;; :server-ip "127.0.0.1" 
+             ;; :server-ip "127.0.0.1"
 
              :css-dirs ["resources/public/css"] ;; watch and update CSS
 
@@ -62,5 +66,5 @@
              ;; :repl false
 
              ;; to configure a different figwheel logfile path
-             ;; :server-logfile "tmp/logs/figwheel-logfile.log" 
+             ;; :server-logfile "tmp/logs/figwheel-logfile.log"
              })

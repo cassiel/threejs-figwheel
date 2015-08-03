@@ -1,5 +1,6 @@
 (ns ^:figwheel-always threejs-figwheel.core
-    (:require [figwheel.client :as fw]))
+    (:require [figwheel.client :as fw]
+              three))
 
 (enable-console-print!)
 
@@ -73,6 +74,9 @@
     (.log js/console "Removing: " (.-xxid renderer))
     (.removeChild (.-body js/document) (.-domElement renderer)))
   (swap! APP-STATE dissoc :stopper :renderer))
+
+;; This confuses me: since we so a ^:figwheel-always, I don't see what purpose
+;; fw/start serves here; perhaps these machinery should be decoupled a bit.
 
 (fw/start {
   :on-jsload (fn []
