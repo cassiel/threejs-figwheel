@@ -2,6 +2,8 @@
 
 # `threejs-figwheel`
 
+*NOTE*: project deprecated (and the toolchain is now broken); see [threejs-figwheel-main](https://github.com/cassiel/threejs-figwheel-main) for a rewrite in Figwheel Main.
+
 An example project which brings up a minimal "live coding" environment for Clojure-based WebGL in the browser, courtesy of [ClojureScript](https://github.com/clojure/clojurescript), [three.js](http://threejs.org/) and [Figwheel](https://github.com/bhauman/lein-figwheel).
 
 This is basically the Figwheel template project in Leiningen, with the core ClojureScript file set up to do some three.js, and a stripped-down `index.html` to host the results. The HTML also wheels in three.js from a CDN (so alter to taste).
